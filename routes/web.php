@@ -1,8 +1,12 @@
 <?php
+
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BidController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
+
 Route::get('/', [ProjectController::class, 'index'])->name('home');
 Route::middleware('guest')->group(function () {
     Route::get('/daftar', [AuthController::class, 'showRegister'])->name('register');
@@ -22,5 +26,15 @@ Route::post('/proyek/{id}/penawaran', [BidController::class, 'store'])
     ->whereNumber('id')
     ->middleware('role:developer')
     ->name('bids.store');
-Route::view('/dasbor', 'placeholder')->name('dashboard');
-Route::view('/admin', 'placeholder')->name('admin');
+Route::get('/dasbor', [DashboardController::class, 'index'])
+    ->middleware('role:klien,developer')
+    ->name('dashboard');
+Route::middleware('role:admin')->prefix('admin')->group(function () {
+    Route::get('/', [AdminController::class, 'index'])->name('admin');
+    Route::patch('/users/{id}/role', [AdminController::class, 'updateRole'])
+        ->whereNumber('id')->name('admin.users.role');
+    Route::delete('/users/{id}', [AdminController::class, 'destroyUser'])
+        ->whereNumber('id')->name('admin.users.destroy');
+    Route::delete('/projects/{id}', [AdminController::class, 'destroyProject'])
+        ->whereNumber('id')->name('admin.projects.destroy');
+});
