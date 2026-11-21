@@ -1,6 +1,6 @@
 <?php
-
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BidController;
 use App\Http\Controllers\ProjectController;
 use Illuminate\Support\Facades\Route;
 Route::get('/', [ProjectController::class, 'index'])->name('home');
@@ -14,7 +14,13 @@ Route::post('/keluar', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('role:klien')->group(function () {
     Route::get('/proyek/baru', [ProjectController::class, 'create'])->name('projects.create');
     Route::post('/proyek', [ProjectController::class, 'store'])->name('projects.store');
+    Route::post('/proyek/{id}/pilih', [BidController::class, 'pick'])
+        ->whereNumber('id')->name('bids.pick');
 });
 Route::get('/proyek/{id}', [ProjectController::class, 'show'])->name('projects.show');
+Route::post('/proyek/{id}/penawaran', [BidController::class, 'store'])
+    ->whereNumber('id')
+    ->middleware('role:developer')
+    ->name('bids.store');
 Route::view('/dasbor', 'placeholder')->name('dashboard');
 Route::view('/admin', 'placeholder')->name('admin');
